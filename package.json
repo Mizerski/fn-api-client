@@ -1,6 +1,6 @@
 {
   "name": "@wmmz/fn-api-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cliente HTTP para requisições API com tratamento de erros e respostas padronizadas",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -19,7 +19,17 @@
     "http",
     "client",
     "axios",
-    "typescript"
+    "typescript",
+    "graphql",
+    "cubejs",
+    "rest",
+    "error",
+    "response",
+    "standard",
+    "standardized",
+    "standardized-response",
+    "standardized-error",
+    "standardized-response-error"
   ],
   "author": "Mizerski",
   "license": "MIT",
