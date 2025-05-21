@@ -349,18 +349,5 @@ interface CubeQueryOptions {
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-## Changelog
+## Changelog (em desenvolvimento | versão 1.0.1)
 
-### 1.0.0 (2024-03-20)
-- ✨ Lançamento inicial
-- 🚀 Suporte a REST e GraphQL
-- 📦 Integração com Cube
-- 🔧 Configurações flexíveis
-
-### 0.9.0 (2024-03-15)
-- 🧪 Versão beta
-- 🔨 Testes e ajustes finais
-
-## Licença
-
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes. 
