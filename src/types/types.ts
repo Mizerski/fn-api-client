@@ -1,0 +1,119 @@
+/**
+ * Interface para erro padronizado da API.
+ * Representa um erro que ocorreu durante uma requisição,
+ * contendo informações detalhadas sobre o problema.
+ * 
+ * @example
+ * ```typescript
+ * const error: ApiError = {
+ *   message: 'Usuário não encontrado',
+ *   status: 404,
+ *   code: 'USER_NOT_FOUND',
+ *   details: {
+ *     userId: '123',
+ *     timestamp: '2024-03-20T10:00:00Z'
+ *   }
+ * }
+ * ```
+ */
+export interface ApiError {
+  /** Mensagem descritiva do erro */
+  message: string
+  /** Código de status HTTP do erro */
+  status: number
+  /** Código interno do erro (opcional) */
+  code?: string
+  /** Detalhes adicionais do erro (opcional) */
+  details?: unknown
+}
+
+/**
+ * Interface base para respostas da API.
+ * Padroniza o formato de resposta para todas as requisições bem-sucedidas.
+ * 
+ * @example
+ * ```typescript
+ * interface User {
+ *   id: number
+ *   name: string
+ *   email: string
+ * }
+ * 
+ * const response: ApiResponse<User> = {
+ *   data: {
+ *     id: 1,
+ *     name: 'João Silva',
+ *     email: 'joao@exemplo.com'
+ *   },
+ *   status: 200,
+ *   message: 'Usuário encontrado com sucesso'
+ * }
+ * ```
+ */
+export interface ApiResponse<T> {
+  /** Dados retornados pela API */
+  data: T
+  /** Código de status HTTP da resposta */
+  status: number
+  /** Mensagem descritiva do resultado */
+  message: string
+}
+
+/**
+ * Interface para callbacks de sucesso e erro.
+ * Define as funções que serão chamadas após uma requisição,
+ * permitindo tratamento personalizado dos resultados.
+ * 
+ * @example
+ * ```typescript
+ * const callbacks: RequestCallbacks<User> = {
+ *   onSuccess: (response) => {
+ *     console.log('Usuário:', response.data)
+ *     console.log('Status:', response.status)
+ *     console.log('Mensagem:', response.message)
+ *   },
+ *   onError: (error) => {
+ *     console.error('Erro:', error.message)
+ *     console.error('Status:', error.status)
+ *     if (error.code) {
+ *       console.error('Código:', error.code)
+ *     }
+ *     if (error.details) {
+ *       console.error('Detalhes:', error.details)
+ *     }
+ *   }
+ * }
+ * ```
+ */
+export interface RequestCallbacks<T> {
+  /** Função chamada quando a requisição é bem-sucedida */
+  onSuccess?: (response: ApiResponse<T>) => void
+  /** Função chamada quando ocorre um erro na requisição */
+  onError?: (error: ApiError) => void
+}
+
+/**
+ * Configurações do cliente API.
+ * Define as opções de configuração para instanciar um cliente API.
+ * 
+ * @example
+ * ```typescript
+ * const config: ApiClientConfig = {
+ *   baseURL: 'https://api.exemplo.com',
+ *   timeout: 5000,
+ *   headers: {
+ *     'Authorization': 'Bearer seu-token',
+ *     'X-API-Version': '1.0',
+ *     'Accept-Language': 'pt-BR'
+ *   }
+ * }
+ * ```
+ */
+export interface ApiClientConfig {
+  /** URL base para todas as requisições */
+  baseURL: string
+  /** Tempo limite em milissegundos (opcional, padrão: 10000) */
+  timeout?: number
+  /** Headers customizados para todas as requisições (opcional) */
+  headers?: Record<string, string>
+}
