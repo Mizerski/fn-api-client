@@ -35,5 +35,13 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+  "type": "git",
+  "url": "git+https://github.com/mizerski/fn-api-client.git"
+},
+"homepage": "https://github.com/mizerski/fn-api-client#readme",
+  "bugs": {
+    "url": "https://github.com/mizerski/fn-api-client/issues"
   }
 }

@@ -6,6 +6,7 @@ Cliente HTTP para requisições API com tratamento de erros e respostas padroniz
 ![Licença](https://img.shields.io/badge/licença-MIT-green.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
+[![npm version](https://img.shields.io/npm/v/@wmmz/fn-api-client.svg)](https://www.npmjs.com/package/@wmmz/fn-api-client)
 
 ## Tabela de Conteúdo
 
