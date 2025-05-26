@@ -63,6 +63,31 @@ const client = new ApiClient({
   }
 });
 
+// Interceptador para adicionar token dinâmico
+client.addRequestInterceptor((config) => {
+  const tokens = storage.getTokens();
+  if (tokens?.accessToken) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${tokens.accessToken}`
+    };
+  }
+  return config;
+});
+
+// Interceptador para refresh token automático
+client.addErrorInterceptor(async (error) => {
+  if (error.status === 401) {
+    await refreshToken();
+    return {
+      data: { message: 'Token renovado' },
+      status: 200,
+      message: 'Autenticação renovada'
+    };
+  }
+  return error;
+});
+
 // GET com tipagem
 interface Usuario {
   id: number;
@@ -92,6 +117,16 @@ const novoUsuario = {
 client.post<Usuario>('/usuarios', novoUsuario, {
   onSuccess: (response) => console.log('Criado:', response.data),
   onError: (error) => console.error('Erro:', error.message)
+});
+
+// GET com parâmetros
+client.get<UserVote>('/votos', { userId: '123', agendaId: '456' }, {
+  onSuccess: (response) => console.log('Voto:', response.data),
+  onError: (error) => {
+    if (error.status === 404) {
+      console.log('Usuário não votou ainda');
+    }
+  }
 });
 ```
 
@@ -199,28 +234,51 @@ await client.query('/cubejs-api/graphql', {
 
 ## Casos de Uso
 
-### 1. Autenticação e Refresh Token
+### 1. Interceptadores para Autenticação
 
 ```typescript
 const client = new ApiClient({
-  baseURL: 'https://api.exemplo.com',
-  headers: {
-    'Authorization': `Bearer ${getToken()}`
-  }
+  baseURL: 'https://api.exemplo.com'
 });
 
-// Interceptor para refresh token
-client.api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      const newToken = await refreshToken();
-      error.config.headers['Authorization'] = `Bearer ${newToken}`;
-      return client.api.request(error.config);
-    }
-    return Promise.reject(error);
+// Interceptador de requisição para token dinâmico
+client.addRequestInterceptor((config) => {
+  const tokens = storage.getTokens();
+  if (tokens?.accessToken) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${tokens.accessToken}`
+    };
   }
-);
+  return config;
+});
+
+// Interceptador de erro para refresh token automático
+client.addErrorInterceptor(async (error) => {
+  if (error.status === 401) {
+    try {
+      const newTokens = await refreshToken();
+      storage.setTokens(newTokens);
+      return {
+        data: { message: 'Token renovado automaticamente' },
+        status: 200,
+        message: 'Autenticação renovada com sucesso'
+      };
+    } catch (refreshError) {
+      return {
+        ...error,
+        message: 'Sessão expirada. Faça login novamente.'
+      };
+    }
+  }
+  return error;
+});
+
+// Interceptador de resposta para logging
+client.addResponseInterceptor((response) => {
+  console.log(`✅ ${response.status}: ${response.message}`);
+  return response;
+});
 ```
 
 ### 2. Upload de Arquivos
@@ -271,10 +329,17 @@ await client.query('/cubejs-api/graphql', {
 | Método | Descrição | Parâmetros |
 |--------|-----------|------------|
 | `constructor` | Cria uma instância do cliente | `config: ApiClientConfig` |
-| `get` | Realiza requisição GET | `url: string, callbacks?: RequestCallbacks<T>` |
+| `get` | Realiza requisição GET | `url: string, paramsOrCallbacks?: QueryParams \| RequestCallbacks<T>, callbacks?: RequestCallbacks<T>` |
 | `post` | Realiza requisição POST | `url: string, data: unknown, callbacks?: RequestCallbacks<T>` |
 | `put` | Realiza requisição PUT | `url: string, data: unknown, callbacks?: RequestCallbacks<T>` |
-| `delete` | Realiza requisição DELETE | `url: string, callbacks?: RequestCallbacks<T>` |
+| `delete` | Realiza requisição DELETE | `url: string, paramsOrCallbacks?: QueryParams \| RequestCallbacks<T>, callbacks?: RequestCallbacks<T>` |
+| `addRequestInterceptor` | Adiciona interceptador de requisição | `interceptor: RequestInterceptor` |
+| `addResponseInterceptor` | Adiciona interceptador de resposta | `interceptor: ResponseInterceptor` |
+| `addErrorInterceptor` | Adiciona interceptador de erro | `interceptor: ErrorInterceptor` |
+| `removeRequestInterceptor` | Remove interceptador de requisição | `interceptor: RequestInterceptor` |
+| `removeResponseInterceptor` | Remove interceptador de resposta | `interceptor: ResponseInterceptor` |
+| `removeErrorInterceptor` | Remove interceptador de erro | `interceptor: ErrorInterceptor` |
+| `clearInterceptors` | Remove todos os interceptadores | `void` |
 
 ### GraphQLClient
 
@@ -325,6 +390,28 @@ interface ApiError {
 interface RequestCallbacks<T> {
   onSuccess?: (response: ApiResponse<T>) => void;
   onError?: (error: ApiError) => void;
+}
+```
+
+### Interceptadores
+
+```typescript
+interface RequestConfig {
+  url?: string;
+  method?: string;
+  headers?: Record<string, string>;
+  data?: unknown;
+  params?: Record<string, unknown>;
+  timeout?: number;
+}
+
+interface QueryParams {
+  [key: string]: string | number | boolean | undefined;
+}
+
+type RequestInterceptor = (config: RequestConfig) => RequestConfig;
+type ResponseInterceptor = <T>(response: ApiResponse<T>) => ApiResponse<T>;
+type ErrorInterceptor = (error: ApiError) => ApiError | Promise<ApiResponse<unknown>>;
 }
 ```
 

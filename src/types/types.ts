@@ -117,3 +117,83 @@ export interface ApiClientConfig {
   /** Headers customizados para todas as requisições (opcional) */
   headers?: Record<string, string>
 }
+
+/**
+ * Configuração de uma requisição HTTP.
+ * Representa os dados que podem ser interceptados e modificados antes do envio.
+ * 
+ * @example
+ * ```typescript
+ * const interceptor: RequestInterceptor = (config) => {
+ *   const token = getToken()
+ *   if (token) {
+ *     config.headers = {
+ *       ...config.headers,
+ *       Authorization: `Bearer ${token}`
+ *     }
+ *   }
+ *   return config
+ * }
+ * ```
+ */
+export interface RequestConfig {
+  /** URL da requisição */
+  url?: string
+  /** Método HTTP */
+  method?: string
+  /** Headers da requisição */
+  headers?: Record<string, string>
+  /** Dados do corpo da requisição */
+  data?: unknown
+  /** Parâmetros de query string */
+  params?: Record<string, unknown>
+  /** Timeout específico para esta requisição */
+  timeout?: number
+}
+
+/**
+ * Função interceptadora de requisições.
+ * Permite modificar a configuração da requisição antes do envio.
+ * 
+ * @param config Configuração da requisição
+ * @returns Configuração modificada da requisição
+ */
+export type RequestInterceptor = (config: RequestConfig) => RequestConfig
+
+/**
+ * Função interceptadora de respostas.
+ * Permite processar a resposta antes de retorná-la para o callback.
+ * 
+ * @param response Resposta da requisição
+ * @returns Resposta processada
+ */
+export type ResponseInterceptor = <T>(response: ApiResponse<T>) => ApiResponse<T>
+
+/**
+ * Função interceptadora de erros.
+ * Permite processar erros antes de retorná-los para o callback.
+ * 
+ * @param error Erro da requisição
+ * @returns Erro processado ou uma nova resposta
+ */
+export type ErrorInterceptor = (error: ApiError) => ApiError | Promise<ApiResponse<unknown>>
+
+/**
+ * Parâmetros de query string para requisições GET e DELETE.
+ * Permite enviar parâmetros na URL da requisição.
+ * 
+ * @example
+ * ```typescript
+ * const params: QueryParams = {
+ *   userId: '123',
+ *   agendaId: '456',
+ *   includeDetails: true,
+ *   limit: 10
+ * }
+ * 
+ * // Será convertido para: ?userId=123&agendaId=456&includeDetails=true&limit=10
+ * ```
+ */
+export interface QueryParams {
+  [key: string]: string | number | boolean | undefined
+}
